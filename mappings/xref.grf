@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Graph author="damiansima" created="Fri Sep 07 13:47:15 GMT-03:00 2012" guiVersion="3.3.0.M2" id="1347044293411" licenseCode="Unlicensed" licenseType="Unknown" modified="Fri Sep 07 13:47:15 GMT-03:00 2012" modifiedBy="damiansima" name="xref" revision="1.0" showComponentDetails="false">
+<Global>
+<Metadata __sourcePath="{}/inputMetadata" _dataStructure="OBJECT" _id="__id" _type="Input" id="b9f37123-7f60-42ce-9c84-08dab5e63bdf">
+<Record fieldDelimiter="|" label="inputMetadata" name="inputMetadata" recordDelimiter="&#10;" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __sourcePath="{}/inputMetadata/jobtitle" label="jobtitle" name="jobtitle" type="string"/>
+<Field __sourcePath="{}/inputMetadata/paytype" label="paytype" name="paytype" type="string"/>
+</Record>
+</Metadata>
+<Metadata _type="Lookup" id="Metadata0">
+<Record fieldDelimiter="|" name="jobtitlexref" recordDelimiter="&#10;" type="delimited">
+<Field name="jobtitle" type="string"/>
+<Field name="paytype" type="string"/>
+<Field name="jobtypeabra" type="string"/>
+<Field name="paytypeabra" type="string"/>
+<Field name="jobtype" type="string"/>
+</Record>
+</Metadata>
+<Metadata __sourcePath="{}/outputMetadata" _dataStructure="OBJECT" _id="__id" _type="Output" id="67598c01-cb5d-499e-b522-d90e481b39a6">
+<Record fieldDelimiter="|" label="outputMetadata" name="outputMetadata" recordDelimiter="&#10;" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __sourcePath="{}/outputMetadata/jobtype" label="jobtype" name="jobtype" type="string"/>
+<Field __sourcePath="{}/outputMetadata/paytype" label="paytype" name="paytype" type="string"/>
+<Field __sourcePath="{}/outputMetadata/jobcode" label="jobcode" name="jobcode" type="string"/>
+</Record>
+</Metadata>
+<LookupTable id="jobtitlexref" key="jobtitle;paytype" metadata="Metadata0" name="jobtitlexref" type="simpleLookup">
+<attr name="lookupType"><![CDATA[UserDefined]]></attr>
+<attr name="data"><![CDATA[Area_Supervisor|Salaried|Area Supervisor|Salary|ROPER01
+eli_Associate|Hourly|eli Associate|Hourly|RFS06
+Deli_Associate|Salaried|Deli Associate|Salary|RFS09
+]]></attr>
+</LookupTable>
+<Dictionary>
+<Entry id="DictionaryEntry0" input="true" name="inputPayload" output="false" type="object"/>
+<Entry id="DictionaryEntry1" input="false" name="outputPayload" output="true" type="object"/>
+</Dictionary>
+</Global>
+<Phase number="0">
+<Node enabled="enabled" fileURL="dict:inputPayload" guiHeight="0" guiName="Maps / List of Maps  READER" guiWidth="0" guiX="20" guiY="20" id="BEAN_READER0" type="BEAN_READER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Context outPort="0" sequenceField="__id" xpath=".">
+  <Mapping cloverField="jobtitle" trim="true" xpath="jobtitle"/>
+  <Mapping cloverField="paytype" trim="true" xpath="paytype"/>
+</Context>
+]]></attr>
+<attr name="_data_format"><![CDATA[MAP]]></attr>
+</Node>
+<Node enabled="enabled" fileURL="dict:outputPayload" guiHeight="0" guiName="Maps / List of Maps  WRITER" guiWidth="0" guiX="680" guiY="20" id="MAP_WRITER0" type="MAP_WRITER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<outputMetadata xmlns:clover="http://www.cloveretl.com/ns/xmlmapping" clover:inPort="0">
+  <jobtype>$0.jobtype</jobtype>
+  <paytype>$0.paytype</paytype>
+  <jobcode>$0.jobcode</jobcode>
+</outputMetadata>]]></attr>
+<attr name="_data_format"><![CDATA[MAP]]></attr>
+</Node>
+<Node enabled="enabled" guiHeight="0" guiName="inputMetadata_to_outputMetadata" guiWidth="0" guiX="240" guiY="20" id="REFORMAT0" type="REFORMAT">
+<attr name="transform"><![CDATA[//#CTL2
+
+// Transforms input record into output record.
+function integer transform() {
+	$out.0.jobcode = (isnull(lookup(jobtitlexref).get($in.0.jobtitle,$in.0.paytype)) ? "" : lookup(jobtitlexref).get($in.0.jobtitle,$in.0.paytype).jobtype);
+	$out.0.jobtype = (isnull(lookup(jobtitlexref).get($in.0.jobtitle,$in.0.paytype)) ? "" : lookup(jobtitlexref).get($in.0.jobtitle,$in.0.paytype).jobtypeabra);
+$out.0.__id=$in.0.__id;
+	$out.0.paytype = (isnull(lookup(jobtitlexref).get($in.0.jobtitle,$in.0.paytype)) ? "" : lookup(jobtitlexref).get($in.0.jobtitle,$in.0.paytype).paytypeabra);
+		return ALL;
+}
+
+// Called during component initialization.
+// function boolean init() {}
+
+// Called during each graph run before the transform is executed. May be used to allocate and initialize resources
+// required by the transform. All resources allocated within this method should be released
+// by the postExecute() method.
+// function void preExecute() {}
+
+// Called only if transform() throws an exception.
+// function integer transformOnError(string errorMessage, string stackTrace) {}
+
+// Called during each graph run after the entire transform was executed. Should be used to free any resources
+// allocated within the preExecute() method.
+// function void postExecute() {}
+
+// Called to return a user-defined error message when an error occurs.
+// function string getMessage() {}
+]]></attr>
+</Node>
+<Edge debugMode="true" fromNode="BEAN_READER0:0" guiBendpoints="" id="Edge0" inPort="Port 0 (in)" metadata="b9f37123-7f60-42ce-9c84-08dab5e63bdf" outPort="Port 0 (out)" toNode="REFORMAT0:0"/>
+<Edge debugMode="true" fromNode="REFORMAT0:0" guiBendpoints="" id="Edge1" inPort="Port 0 (in)" metadata="67598c01-cb5d-499e-b522-d90e481b39a6" outPort="Port 0 (out)" toNode="MAP_WRITER0:0"/>
+</Phase>
+</Graph>

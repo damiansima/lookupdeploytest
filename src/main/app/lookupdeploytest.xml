@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd 
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd ">
+    <data-mapper:config name="xref" transformationGraphPath="xref.grf" doc:name="DataMapper"/>
+    <flow name="JobTitleXrefFlow" doc:name="JobTitleXrefFlow">
+        <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="${http.port}" path="test" doc:name="HTTP"/>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy">
+                <scripting:text><![CDATA[return ['jobtitle':message.getInboundProperty('jobtitle'), 'paytype':message.getInboundProperty('paytype')]]]></scripting:text>
+            </scripting:script>
+        </scripting:component>
+        <data-mapper:transform config-ref="xref" doc:name="DataMapper"/>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy">
+                <scripting:text><![CDATA[return 'JobType: ' + message.getPayload().get('jobtype')+
+        ' PayType: ' + message.getPayload().get('paytype')+
+        ' JobCode: ' + message.getPayload().get('jobcode')]]></scripting:text>
+            </scripting:script>
+        </scripting:component>
+    </flow>
+</mule>
